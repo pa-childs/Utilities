@@ -15,17 +15,20 @@ import os
 args = argparse.ArgumentParser(prog='file_compare.py',
                                description='This script will compare the contents of two files, the differences found'
                                            ' will be logged to a file.  Both files to be compared are required'
-                                           ' arguments.  The differences will be placed in the current working directory'
+                                           ' arguments. The differences will be placed in the current working directory'
                                            ' in a file named "differences.txt".  The differences file path and name can'
                                            ' be changed if desired.')
+
 args.add_argument('--file1',
                   type=str,
                   help='The full path and file name of the first file to compare.',
                   required=True)
+
 args.add_argument('--file2',
                   type=str,
                   help='The full path and file name of the second file to compare.',
                   required=True)
+
 args.add_argument('--results',
                   type=str,
                   default=os.getcwd() + '//differences.txt',
