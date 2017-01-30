@@ -16,7 +16,7 @@ start_time = datetime.datetime.now()
 
 # Get and format string for Archive Name
 today = datetime.datetime.today()
-formatted_date = today.strftime('%Y%m%d-%H%M')
+formatted_date = today.strftime('%Y%m%d-%H%M%S')
 
 # Gather arguments which contain paths and file names for the files to be used.
 args = argparse.ArgumentParser(prog='archive_files.py',
@@ -36,11 +36,11 @@ args.add_argument('--destdir',
                   help='The full path of the directory where the archive will be stored.',
                   required=False)
 
-#  TODO: Need to handle format of the file name better if user doesn't use default
 args.add_argument('--zip',
                   type=str,
-                  default='archived_files-{0}.zip'.format(formatted_date),
-                  help='The file name of the log file.',
+                  default='archived_files',
+                  help='The file name of the log file. A timestamp is appended to the end of the file name with the '
+                       ' format YYYYMMDD-HHMMSS.',
                   required=False)
 
 args.add_argument('--ignore',
@@ -55,11 +55,11 @@ args.add_argument('--log',
                        'setting is False.',
                   required=False)
 
-#  TODO: Need to handle format of the file name better if user doesn't use default
 args.add_argument('--logfile',
                   type=str,
-                  default='archived_files-{0}.log'.format(formatted_date),
-                  help='The file name of the log file.',
+                  default='archived_files',
+                  help='The file name of the log file. A timestamp is appended to the end of the file name with the '
+                       ' format YYYYMMDD-HHMMSS.',
                   required=False)
 
 command_arguments = args.parse_args()
@@ -75,8 +75,8 @@ log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
 
 if command_arguments.log is True:
-    # TODO: Need to allow user to change path of logfile
-    file_handler = logging.FileHandler(command_arguments.logfile)
+    # TODO: Would like to allow user to change path of logfile
+    file_handler = logging.FileHandler(command_arguments.logfile + '-{0}.log'.format(formatted_date))
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -97,7 +97,7 @@ def main():
     # Assign directories and file names
     source_directory = command_arguments.srcdir
     destination_directory = command_arguments.destdir
-    zip_file_name = command_arguments.zip
+    zip_file_name = command_arguments.zip + '-{0}.zip'.format(formatted_date)
 
     # Separate files to ignore into list for processing
     ignore_list = []
