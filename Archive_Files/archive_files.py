@@ -11,7 +11,6 @@ import datetime
 import logging
 import os
 import zipfile
-from shutil import copyfile
 
 start_time = datetime.datetime.now()
 
@@ -67,19 +66,27 @@ command_arguments = args.parse_args()
 
 # Setup logging.  Display INFO messages and higher to console and file log
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s %(levelname)s-%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 
 log_handler = logging.StreamHandler()
-log_handler.setLevel(logging.INFO)
+log_handler.setLevel(logging.DEBUG)
 log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
 
 if command_arguments.log is True:
-    file_handler = logging.FileHandler(dest_dir + command_arguments.logfile)
+    # TODO: Need to allow user to change path of logfile
+    file_handler = logging.FileHandler(command_arguments.logfile)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
+
+logger.debug('--srcdir = {0}'.format(command_arguments.srcdir))
+logger.debug('--destdir = {0}'.format(command_arguments.destdir))
+logger.debug('--zip = {0}'.format(command_arguments.zip))
+logger.debug('--ignore = {0}'.format(command_arguments.ignore))
+logger.debug('--log = {0}'.format(command_arguments.log))
+logger.debug('--logfile = {0}'.format(command_arguments.logfile))
 
 
 def main():
@@ -88,16 +95,16 @@ def main():
     """
 
     # Assign directories and file names
-    working_directory = os.getcwd()
     source_directory = command_arguments.srcdir
     destination_directory = command_arguments.destdir
-    root_directory = os.path.dirname(source_directory)
     zip_file_name = command_arguments.zip
 
     # Separate files to ignore into list for processing
-    ignore_string = command_arguments.ignore
-    ignore_list = ignore_string.split(",")
-    ignore_list = [file_name.strip(' ') for file_name in ignore_list]
+    ignore_list = []
+    if command_arguments.ignore is not None:
+        ignore_string = command_arguments.ignore
+        ignore_list = ignore_string.split(",")
+        ignore_list = [file_name.strip(' ') for file_name in ignore_list]
 
     try:
         
@@ -106,7 +113,7 @@ def main():
         zip_archive = zipfile.ZipFile(destination_directory + '\\' + zip_file_name, mode='w')
     
         # Change the working directory to where the files are
-        os.chdir(working_directory)
+        os.chdir(destination_directory)
         
     except Exception:
         
@@ -114,31 +121,40 @@ def main():
         quit()
 
     try:
-        
+
         # Walk through directory starting at source_directory and archive files
-        for folder, subfolders, files in os.walk(source_directory):
+        for root, directories, files in os.walk(source_directory):
 
             for file in files:
 
                 # Don't include files that are in the ignore_list
                 if file in ignore_list:
 
-                    logger.info('Ignoring {0}...'.format(file))
+                    logger.info('Ignoring {0}...'.format(os.path.relpath(os.path.join(root, file),
+                                                         os.path.join(source_directory,
+                                                         '..')),
+                                                         file))
                     continue
 
                 else:
 
                     # Add all other files to zip_archive
-                    logger.info('Archiving {0}\\{1}...'.format(folder, file))
+                    logger.info('Archiving {0}\\{1}...'.format(os.path.relpath(os.path.join(root, file),
+                                                               os.path.join(source_directory,
+                                                               '..')),
+                                                               file))
 
                     try:
 
-                        #  TODO: Would be nice to only zip relative paths instead of full path
-                        zip_archive.write(os.path.join(folder, file), compress_type=zipfile.ZIP_DEFLATED)
+                        zip_archive.write(os.path.join(root, file),
+                                          os.path.relpath(os.path.join(root, file),
+                                                          os.path.join(source_directory,
+                                                          '..')),
+                                          compress_type=zipfile.ZIP_DEFLATED)
                     except PermissionError:
 
                         logger.warning('Skipping {0} due to PermissionError'.format(file))
-        
+
         logger.info('Closing Archive File\n')
 
     except Exception:
