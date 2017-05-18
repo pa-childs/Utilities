@@ -7,6 +7,7 @@ Created on: October 28, 2016
 """
 
 import argparse
+import colorlog
 import logging
 import os
 
@@ -37,11 +38,20 @@ dir_path = command_arguments.path
 file_name = "test_file-{0}MB.dat".format(str(file_size_in_mb))
 
 # Setup logging.  Display INFO messages and higher to console
-logger = logging.getLogger(__name__)
-log_handler = logging.StreamHandler()
-logger.setLevel(logging.INFO)
+logger = colorlog.getLogger(__name__)
+logger.setLevel(colorlog.colorlog.logging.INFO)
+
+log_handler = colorlog.StreamHandler()
+log_handler.setFormatter(colorlog.ColoredFormatter())
 log_handler.setLevel(logging.INFO)
+
 logger.addHandler(log_handler)
+
+logger.debug("Debug message")
+logger.info("Information message")
+logger.warning("Warning message")
+logger.error("Error message")
+logger.critical("Critical message")
 
 
 def main():
