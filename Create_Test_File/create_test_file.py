@@ -22,7 +22,7 @@ args = argparse.ArgumentParser(prog='create_test_file.py',
 args.add_argument('--size',
                   type=int,
                   help='The file size in MB.',
-                  default=5,
+                  default=14,
                   required=False)
 
 args.add_argument('--path',
@@ -46,12 +46,6 @@ log_handler.setFormatter(colorlog.ColoredFormatter())
 log_handler.setLevel(logging.INFO)
 
 logger.addHandler(log_handler)
-
-logger.debug("Debug message")
-logger.info("Information message")
-logger.warning("Warning message")
-logger.error("Error message")
-logger.critical("Critical message")
 
 
 def main():
@@ -79,8 +73,9 @@ def main():
         quit()
 
     logger.info("Finished Building File")
-    logger.info("File Location: {0}\{1}".format(dir_path, file_name))
+    logger.info("File Location: {0}\\{1}".format(dir_path, file_name))
     logger.info("File Size: {0}MB".format(file_size_in_mb))
+
 
 if __name__ == '__main__':
     main()
